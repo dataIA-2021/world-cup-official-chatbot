@@ -19,7 +19,30 @@ from pygame import mixer
 import time
 
 
+def speak():
+    r = sr.Recognizer()
+    with sr.Microphone() as source:
+        audio = r.listen(source)
+    try:
+        textval = r.recognize_google(audio, language="fr-FR")
+        print("J'ai entendu :", textval)
+    except sr.UnknownValueError:
+        print("J'ai rien compris")
+    except sr.RequestError as e:
+        print("L'API Speech de Google est hors service" + format(e))
+    if textval == 'oui':
+        print("Le fantôme arrive et est prêt à réponse au questions voulues")
 
+    return textval
+
+def robot(sentence,timesleep):
+
+    tts = gTTS(sentence, lang="fr", slow=False, pre_processor_funcs = [abbreviations, end_of_line]) # Save the audio in a mp3 file
+    tts.save('buffer.mp3')# Play the audio
+    mixer.init()
+    mixer.music.load("buffer.mp3")
+    mixer.music.play()# Wait for the audio to be played
+    time.sleep(timesleep)
 
 nltk.download("punkt")
 nltk.download("wordnet")
@@ -30,18 +53,18 @@ wnl = WordNetLemmatizer()
 
 dictionnaireDintentions = {"joueurs_equipe_france" : [
     {"tag" : "ATTAQUANTS",
-     "patterns" : ["qui est attaquant","quels sont les joueurs en attaque"],
+     "patterns" : ["attaquants","quels sont les joueurs en attaque"],
      "reponses" : ["Marcus Thuram", "Wissam Ben Yedder", "Randal Kolo Muani", "Karim Benzema", "Ousmane Dembélé","Kylian Mbappé", "Olivier Giroud"]},
      {"tag" : "MILIEUX",
-     "patterns" : ["qui est au milieu","quels sont les joueurs du milieu"],
+     "patterns" : ["milieu","quels sont les joueurs du milieu"],
      "reponses" : ["Eduardo Camavinga", "Paul Pogba","Antoine Griezmann","Aurélien Tchouameni","Kingsley Coman","Thomas Lemar","Mattéo Guendouzi","Adrien Rabiot","Florian Thauvin","Jordan Veretout"
      ,"Youssouf Fofana"]},
      {"tag" : "DÉFENSEURS",
-     "patterns" : ["qui est en défense","quels sont les joueurs en défense"],
+     "patterns" : ["défense","quels sont les joueurs en défense"],
      "reponses" : ["Axel Disasi", "Benjamin Pavard", "William Saliba","Ibrahima Konaté","Raphaël Varane","Jules Koundé","Dayot Upamecano","Lucas Digne","Léo Dubois","Clément Lenglet"
      ,"Lucas Hernández","Samuel Umtiti","Theo Hernández"]},
      {"tag" : "GARDIENS",
-     "patterns" : ["qui est au but","qui est le gardien"],
+     "patterns" : ["but","gardien"],
      "reponses" : ["Hugo Lloris", "Steve Mandanda", "Mike Maignan","Alphonse Aréola"]}]
 }
 
@@ -140,16 +163,21 @@ def get_response(intents_list, intents_json):
             break
     return result
 
+robot("Bienvenue au Qatar prêt à dépenser ton fric petit joueur ?",5)
 while True:
     print("---------------------")
-    print("Indiquez votre question")
-    message = input()
-    if message.lower() == "q":
-        print("Au plaisir de parler avec toi !")
+    question = "Pose ici ta question"
+    robot(question,2)
+    #message = input()
+    message = speak()
+    if message.lower() == "quitter":
+        robot("Au plaisir de parler avec toi beau goss!",3)
         break
     else:
         intentions = pred_class(message, motsDistinctPattern, tagsList)
         reponse = get_response(intentions, dictionnaireDintentions)
         print(reponse)
+        robot(reponse,2)
+        
 
 
