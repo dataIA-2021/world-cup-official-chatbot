@@ -17,6 +17,7 @@ from gtts import gTTS
 from gtts.tokenizer.pre_processors import abbreviations, end_of_line
 from pygame import mixer
 import time
+from mutagen.mp3 import MP3
 
 
 def speak():
@@ -35,14 +36,15 @@ def speak():
 
     return textval
 
-def robot(sentence,timesleep):
+def robot(sentence):
 
     tts = gTTS(sentence, lang="fr", slow=False, pre_processor_funcs = [abbreviations, end_of_line]) # Save the audio in a mp3 file
     tts.save('buffer.mp3')# Play the audio
+    audio = MP3("buffer.mp3")
     mixer.init()
     mixer.music.load("buffer.mp3")
     mixer.music.play()# Wait for the audio to be played
-    time.sleep(timesleep)
+    time.sleep(audio.info.length)
 
 nltk.download("punkt")
 nltk.download("wordnet")
@@ -65,7 +67,13 @@ dictionnaireDintentions = {"joueurs_equipe_france" : [
      ,"Lucas Hernández","Samuel Umtiti","Theo Hernández"]},
      {"tag" : "GARDIENS",
      "patterns" : ["but","gardien"],
-     "reponses" : ["Hugo Lloris", "Steve Mandanda", "Mike Maignan","Alphonse Aréola"]}]
+     "reponses" : ["Hugo Lloris", "Steve Mandanda", "Mike Maignan","Alphonse Aréola"]},
+     {"tag" : "DATE",
+     "patterns" : ["date","coupe du monde","mois"],
+     "reponses" : ["La coupe du monde démarre le dimanche 20 novembre"]},
+     {"tag" : "VOIR",
+     "patterns" : ["voir le match","ou","chez"],
+     "reponses" : ["Tu peux voir le match de la coupe du monde chez Jeremy"]}]
 }
 
 #print(dictionnaireDintentions["intentions"][0]["tag"])
@@ -163,21 +171,18 @@ def get_response(intents_list, intents_json):
             break
     return result
 
-robot("Bienvenue au Qatar prêt à dépenser ton fric petit joueur ?",5)
+robot("Bienvenue au Qatar prêt à dépenser ton fric petite merde, allez j'ai pas que ça a faire ?")
 while True:
     print("---------------------")
     question = "Pose ici ta question"
-    robot(question,2)
+    robot(question)
     #message = input()
     message = speak()
     if message.lower() == "quitter":
-        robot("Au plaisir de parler avec toi beau goss!",3)
+        robot("Au plaisir de parler avec toi beau goss!")
         break
     else:
         intentions = pred_class(message, motsDistinctPattern, tagsList)
         reponse = get_response(intentions, dictionnaireDintentions)
         print(reponse)
-        robot(reponse,2)
-        
-
-
+        robot(reponse)
