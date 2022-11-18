@@ -8,6 +8,19 @@ from nltk.tokenize import word_tokenize
 import tensorflow as tf 
 from keras import Sequential 
 from keras.layers.core import Dense,Dropout
+
+# Audio
+import pyaudio
+import speech_recognition as sr
+import sys
+from gtts import gTTS
+from gtts.tokenizer.pre_processors import abbreviations, end_of_line
+from pygame import mixer
+import time
+
+
+
+
 nltk.download("punkt")
 nltk.download("wordnet")
 nltk.download('omw-1.4')
@@ -138,3 +151,5 @@ while True:
         intentions = pred_class(message, motsDistinctPattern, tagsList)
         reponse = get_response(intentions, dictionnaireDintentions)
         print(reponse)
+
+
